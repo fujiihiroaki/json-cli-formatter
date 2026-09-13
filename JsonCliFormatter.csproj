@@ -10,6 +10,16 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
+    <Company>Hiroaki Fujii</Company>
+    <Product>A CLI tool to format JSON files or strings with proper line breaks.</Product>
+    <AssemblyVersion>0.1.0</AssemblyVersion>
+    <Version>0.1.0</Version>
+    <Title>A CLI tool to format JSON files or strings with proper line breaks.</Title>
+    <Authors>Hiroaki Fujii</Authors>
+    <Description>A CLI tool to format JSON files or strings with proper line breaks.</Description>
+    <Copyright>Copyright 2026 Hiroaki Fujii</Copyright>
+    <PackageProjectUrl>https://github.com/fujiihiroaki/json-cli-formatter</PackageProjectUrl>
+    <PackageLicenseUrl>https://opensource.org/license/mit</PackageLicenseUrl>
   </PropertyGroup>
 
   <ItemGroup>
