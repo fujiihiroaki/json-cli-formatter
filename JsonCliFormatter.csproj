@@ -8,6 +8,7 @@
     <RootNamespace>Jiifureit.JsonCliFormatter</RootNamespace>
     <AssemblyName>jsonfmt</AssemblyName>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
   </PropertyGroup>
 
