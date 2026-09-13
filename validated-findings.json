@@ -1,0 +1,46 @@
+{
+  "validation_id": "val-2026-09-13-001",
+  "validation_date": "2026-09-13T15:15:37+09:00",
+  "scan_id": "scan-2026-09-13-001",
+  "threat_model_path": ".factory/threat-model.md",
+  "scan_mode": "staged",
+  "commit_range": "HEAD..staged",
+  "validated_findings": [],
+  "false_positives": [
+    {
+      "id": "VULN-001",
+      "reason": "Excluded by the security-review precedent that CLI flags are trusted and by the hard exclusions for local resource exhaustion without significant business impact or a clear external attack path.",
+      "evidence": "The repository is a standalone local CLI with no network listener, service wrapper, authentication boundary, or unattended multi-tenant deployment. The value originates only from the invoking user's --indent flag."
+    },
+    {
+      "id": "VULN-002",
+      "reason": "Excluded as local memory exhaustion without a demonstrated external attack path. Whole-document buffering is also an explicit accepted design trade-off for ordinary developer-sized JSON.",
+      "evidence": "Input enters through a local command-line path or the invoking user's stdin. The threat model states that the primary deployment is direct local execution and accepts whole-document processing for that use case."
+    },
+    {
+      "id": "VULN-003",
+      "reason": "Excluded by the hard rule for GitHub Actions findings without a specific untrusted input path. Mutable tags are supply-chain hardening advice, not a validated exploit in this change.",
+      "evidence": "The workflow uses official GitHub actions and no attacker-controlled expression is passed to a shell or privileged action input."
+    }
+  ],
+  "dependency_findings": [],
+  "summary": {
+    "total_scanned": 3,
+    "confirmed": 0,
+    "false_positives": 3,
+    "by_severity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "by_stride": {
+      "Spoofing": 0,
+      "Tampering": 0,
+      "Repudiation": 0,
+      "InfoDisclosure": 0,
+      "DoS": 0,
+      "ElevationOfPrivilege": 0
+    }
+  }
+}

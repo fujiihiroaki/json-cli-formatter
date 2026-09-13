@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore JsonCliFormatter.Tests/JsonCliFormatter.Tests.csproj
+
+      - name: Build
+        run: dotnet build JsonCliFormatter.Tests/JsonCliFormatter.Tests.csproj --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test JsonCliFormatter.Tests/JsonCliFormatter.Tests.csproj --no-build --configuration Release --verbosity normal

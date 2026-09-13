@@ -427,3 +427,25 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# JetBrains Rider
+.idea/
+.idea/*.iml
+*.rider/
+
+# Rider local history
+.localhistory/
+
+# Rider build results
+out/
+build/
+target/
+
+# .devcontainer
+.devcontainer/
+
+# Setting file
+local.settings.json
+
+# Private information backup files
+*.json.bak

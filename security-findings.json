@@ -1,0 +1,88 @@
+{
+  "scan_id": "scan-2026-09-13-001",
+  "scan_date": "2026-09-13T15:04:10+09:00",
+  "scan_type": "working",
+  "commit_range": "HEAD..working-tree",
+  "pr_number": null,
+  "threat_model_version": "1.0.0",
+  "findings": [
+    {
+      "id": "VULN-001",
+      "severity": "MEDIUM",
+      "stride_category": "DoS",
+      "vulnerability_type": "Uncontrolled Resource Consumption Through Indentation",
+      "cwe": "CWE-400",
+      "file": "JsonFormatter.cs",
+      "line_range": "105-106",
+      "code_context": "var childIndent = new string(' ', (depth + 1) * indentSize);\nvar closingIndent = new string(' ', depth * indentSize);",
+      "analysis": "The CLI accepts every non-negative Int32 as --indent, then multiplies that value by nesting depth and allocates strings of the resulting size. Large values can force multi-gigabyte allocations, and unchecked multiplication can wrap to a negative length. OutOfMemoryException, OverflowException, and ArgumentOutOfRangeException are not handled, so a crafted invocation can terminate the process or exhaust memory in an automated worker.",
+      "exploit_scenario": "A pipeline exposes the formatter's indentation option to a submitted job. Supplying --indent 200000000 with a nested JSON document causes large allocations or integer wraparound before useful output is produced, disrupting the worker.",
+      "threat_model_reference": "Section 5, D2: Unbounded indentation width",
+      "existing_mitigations": [
+        "Negative and nonnumeric indentation values are rejected.",
+        "JsonDocument applies a default maximum nesting depth."
+      ],
+      "recommended_fix": "Define and enforce a practical maximum indentation width in both Program.cs and JsonFormatter.Format, use checked arithmetic for depth multiplied by indentation, add boundary tests, and update the OpenSpec requirement and README to document the accepted range.",
+      "confidence": "HIGH",
+      "reasoning": "The user-controlled value flows directly from Program.cs into unchecked string-allocation lengths, with no upper bound and no exception handling for allocation failure."
+    },
+    {
+      "id": "VULN-002",
+      "severity": "MEDIUM",
+      "stride_category": "DoS",
+      "vulnerability_type": "Unbounded JSON Input Buffering",
+      "cwe": "CWE-400",
+      "file": "Program.cs",
+      "line_range": "140-152",
+      "code_context": "return File.ReadAllText(inputPath);\nreturn File.Exists(positional) ? File.ReadAllText(positional) : positional;\nreturn Console.In.ReadToEnd();",
+      "analysis": "File and standard-input sources are read without a byte or character limit. During formatting, the original string, JsonDocument representation, indentation strings, and output StringBuilder can coexist. A large valid JSON document therefore amplifies memory use and can exhaust a CI worker or long-running wrapper process.",
+      "exploit_scenario": "An automated formatter consumes an attacker-controlled artifact or stdin stream. A sufficiently large JSON array is fully buffered and parsed, causing excessive memory use and termination of the formatter or its worker.",
+      "threat_model_reference": "Section 5, D1: Unbounded input and whole-document parsing",
+      "existing_mitigations": [
+        "JsonDocument rejects malformed JSON and excessive default nesting depth.",
+        "The primary documented deployment is an interactive local CLI."
+      ],
+      "recommended_fix": "Set a documented maximum input size, enforce it with bounded stream reads for both files and stdin, reject oversized input before parsing, and add tests for limits and multibyte UTF-8 input. If large files are a requirement, redesign around Utf8JsonReader and streaming output instead of whole-document buffering.",
+      "confidence": "HIGH",
+      "reasoning": "All three input paths visibly perform unbounded whole-input reads, and the formatter visibly creates additional in-memory representations of the same attacker-controlled content."
+    },
+    {
+      "id": "VULN-003",
+      "severity": "LOW",
+      "stride_category": "Tampering",
+      "vulnerability_type": "Mutable GitHub Actions Dependencies",
+      "cwe": "CWE-829",
+      "file": ".github/workflows/ci.yml",
+      "line_range": "19-22",
+      "code_context": "uses: actions/checkout@v4\nuses: actions/setup-dotnet@v4",
+      "analysis": "The workflow executes actions referenced by mutable major-version tags. If an upstream tag or publisher account is compromised, altered action code can execute in CI. The workflow also does not declare an explicit minimal GITHUB_TOKEN permissions block, leaving effective permissions dependent on repository settings.",
+      "exploit_scenario": "A compromised upstream action tag is moved to malicious code. The next push or pull-request workflow downloads and executes that code with the job's token and access to checked-out repository content.",
+      "threat_model_reference": "Section 3, CI zone; Section 4, CI integrity",
+      "existing_mitigations": [
+        "Both actions are maintained by GitHub.",
+        "GitHub reduces token and secret access for pull requests from forks."
+      ],
+      "recommended_fix": "Pin each action to a reviewed full commit SHA and add a top-level permissions block granting only contents: read. Use dependency-update automation to keep pinned SHAs current.",
+      "confidence": "HIGH",
+      "reasoning": "The changed workflow directly uses mutable action references and has no explicit token-permission restriction; the risk is bounded by the trustworthiness of official GitHub publishers."
+    }
+  ],
+  "summary": {
+    "total_findings": 3,
+    "by_severity": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 2,
+      "LOW": 1
+    },
+    "by_stride": {
+      "Spoofing": 0,
+      "Tampering": 1,
+      "Repudiation": 0,
+      "InfoDisclosure": 0,
+      "DoS": 2,
+      "ElevationOfPrivilege": 0
+    },
+    "files_analyzed": 40
+  }
+}
